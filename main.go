@@ -105,7 +105,6 @@ func main() {
 
 		data, indices := r.render()
 		glDraw(program, vao, vbo, ebo, data, indices)
-		glDraw(program, vao, vbo, ebo, cubeVertices, cubeIndices)
 
 		glfw.PollEvents()
 		window.SwapBuffers()
