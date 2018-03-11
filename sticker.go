@@ -1,20 +1,7 @@
 package main
 
-type color int
-
-const (
-	_ color = iota
-	white
-	yellow
-	orange
-	red
-	green
-	blue
-)
-
 // A Rubik's Cube can be represented in terms of individual stickers.
 type sticker struct {
-	// c must be a valid Rubik's Cube color.
 	c color
 
 	// Each sticker is stuck to a mini-cube; v is the position of the center of

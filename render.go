@@ -6,51 +6,35 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-func (c color) rgb() []float32 {
-	switch c {
-	case white:
-		return []float32{1, 1, 1}
-	case yellow:
-		return []float32{0.9, 0.9, 0}
-	case orange:
-		return []float32{0.9, 0.4, 0.1}
-	case red:
-		return []float32{0.9, 0, 0}
-	case green:
-		return []float32{0, 0.7, 0.3}
-	case blue:
-		return []float32{0, 0, 1}
-	default:
-		panic(fmt.Sprintf("Unknown color %v", c))
-	}
-}
+// The functions in this file "render" an abstract representation of a Rubik's
+// Cube into vertex data that can be used by OpenGL for drawing.
 
-func (v ivec3) vec3() mgl32.Vec3 {
+func (v ivec3) render() mgl32.Vec3 {
 	return mgl32.Vec3{float32(v[0]), float32(v[1]), float32(v[2])}
 }
 
-var axes3 = []mgl32.Vec3{
-	{1, 0, 0},
-	{0, 1, 0},
-	{0, 0, 1},
-}
-
-var zero3 = mgl32.Vec3{0, 0, 0}
-
+// Given a nonzero input vector u, returns an arbitrary nonzero vector that's
+// orthogonal to u.
 func orthogonalVec3(u mgl32.Vec3) mgl32.Vec3 {
-	for _, axis := range axes3 {
+	for _, axis := range []mgl32.Vec3{
+		{1, 0, 0},
+		{0, 1, 0},
+		{0, 0, 1},
+	} {
 		v := u.Cross(axis)
-		if !v.ApproxEqual(zero3) {
+		if !v.ApproxEqual(mgl32.Vec3{0, 0, 0}) {
 			return v
 		}
 	}
-	return zero3
+	panic(fmt.Sprintf("Invalid input vector %v", u))
 }
 
-func orthogonalPlane3(u mgl32.Vec3) [4]mgl32.Vec3 {
-	v := orthogonalVec3(u).Normalize().Mul(0.48)
-	w := u.Cross(v).Normalize().Mul(0.48)
-	return [4]mgl32.Vec3{
+// Given a nonzero input vector u, returns the four corners of a unit square
+// orthogonal to u and centered at the origin.
+func orthogonalUnitSquare3(u mgl32.Vec3) []mgl32.Vec3 {
+	v := orthogonalVec3(u).Normalize().Mul(0.5)
+	w := u.Cross(v).Normalize().Mul(0.5)
+	return []mgl32.Vec3{
 		v.Add(w),
 		v.Sub(w),
 		w.Sub(v),
@@ -58,32 +42,42 @@ func orthogonalPlane3(u mgl32.Vec3) [4]mgl32.Vec3 {
 	}
 }
 
-func (s sticker) render() []float32 {
-	corners := orthogonalPlane3(s.n.vec3())
-	for i := range corners {
-		corners[i] = corners[i].Add(s.v.vec3()).Add(s.n.vec3().Mul(0.5))
+// A rendered sticker consists of vertex data (position and color) for each of
+// the 4 corners of the sticker.  The data layout is as follows:
+//
+// x1, y1, z1, r1, g1, b1,
+// x2, y2, z2, r2, g2, b2,
+// ...
+//
+// In other words, the position offset is 0, the color offset is 12 (3 float32
+// values), and the stride is 24 (6 float32 values).
+func (s sticker) render(vertexData *[]float32) {
+	translation := s.v.render().Add(s.n.render().Mul(0.5))
+	for _, corner := range orthogonalUnitSquare3(s.n.render()) {
+		vertexPosition := corner.Add(translation)
+		*vertexData = append(*vertexData, vertexPosition[:]...)
+		*vertexData = append(*vertexData, s.c.rgb()...)
 	}
-	data := make([]float32, 0, 24)
-	for _, corner := range corners {
-		data = append(data, corner[:]...)
-		data = append(data, s.c.rgb()...)
-	}
-	return data
 }
 
-var elementIndices = []uint32{
-	0, 1, 2,
-	1, 2, 3,
-}
-
+// A rendered Rubik's Cube is the concatenation of all rendered stickers,
+// together with a slice of element indexes that specify how to group vertices
+// into triangles for drawing.
 func (r rubiksCube) render() ([]float32, []uint32) {
-	data := make([]float32, 0, 24*len(r))
-	indices := make([]uint32, 0, 6*len(r))
+	vertexData := make([]float32, 0, 24*len(r))
+	elementIndexes := make([]uint32, 0, 6*len(r))
 	for i, s := range r {
-		data = append(data, s.render()...)
-		for _, elementIndex := range elementIndices {
-			indices = append(indices, uint32(4*i)+elementIndex)
+		s.render(&vertexData)
+		// The two triangles formed by grouping corners {0, 1, 2} and {1, 2, 3}
+		// produce a square.
+		//
+		// WARNING: These element indexes offsets depend on the order of corners
+		// returned by orthogonalUnitSquare3.
+		for _, elementIndexOffset := range []uint32{0, 1, 2, 1, 2, 3} {
+			elementIndexes = append(
+				elementIndexes,
+				uint32(4*i)+elementIndexOffset)
 		}
 	}
-	return data, indices
+	return vertexData, elementIndexes
 }

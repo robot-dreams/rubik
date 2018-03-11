@@ -4,6 +4,7 @@ package main
 // always integer values.
 type ivec3 [3]int
 
+// We pre-define the positive and negative coordinate axes for convenience.
 var (
 	posX = ivec3{1, 0, 0}
 	posY = ivec3{0, 1, 0}

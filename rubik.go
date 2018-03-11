@@ -24,7 +24,7 @@ func newRubiksCube() rubiksCube {
 // predicate p that specifies which stickers to transform, together with a
 // function t that transforms vectors.
 func (r *rubiksCube) transform(p func(sticker) bool, t func(ivec3) ivec3) {
-	for i, s := range r {
+	for i, s := range *r {
 		if p(s) {
 			(*r)[i] = s.transform(t)
 		}
