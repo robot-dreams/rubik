@@ -7,7 +7,6 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/go-gl/mathgl/mgl32/matstack"
 )
 
 const (
@@ -63,11 +62,8 @@ func main() {
 	gl.GenBuffers(1, &vbo)
 	gl.GenBuffers(1, &ebo)
 
-	s := matstack.NewMatStack()
-	s.LeftMul(mgl32.Translate3D(-0.5, -0.5, -0.5))
-	s.LeftMul(mgl32.LookAt(10, 6, 10, 0, 0, 0, 0, 1, 0))
-	s.LeftMul(mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100))
-	mustSetUniformMatrix4fv(program, "transform", s.Peek())
+	setUniformMatrix4fv(program, "view", mgl32.LookAt(10, 6, 10, 0, 0, 0, 0, 1, 0))
+	setUniformMatrix4fv(program, "perspective", mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100))
 
 	r := newRubiksCube()
 	r.buffer(vao, vbo, ebo)

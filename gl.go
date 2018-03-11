@@ -92,10 +92,10 @@ func glProgram(
 	return program, nil
 }
 
-func mustSetUniformMatrix4fv(program uint32, name string, m mgl32.Mat4) {
+func setUniformMatrix4fv(program uint32, name string, m mgl32.Mat4) {
 	ul := gl.GetUniformLocation(program, gl.Str(name+"\x00"))
 	if ul == -1 {
-		panic(fmt.Errorf("uniform %v not found", name))
+		panic(fmt.Errorf("invalid uniform %v", name))
 	}
 	gl.ProgramUniformMatrix4fv(program, ul, 1, false, &m[0])
 }
