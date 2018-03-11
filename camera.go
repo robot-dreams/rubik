@@ -3,7 +3,6 @@ package main
 import (
 	"math"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -19,6 +18,10 @@ const (
 	// (0, 1, 0) as the "up" vector while avoiding degenerate cases.
 	minϕ = math.Pi / 12
 	maxϕ = 11 * math.Pi / 12
+
+	// We restrict r to a reasonable range.
+	minR = 10
+	maxR = 50
 
 	// Arbitrary constant that controls how much θ and ϕ change in response to
 	// a given input event.
@@ -50,25 +53,4 @@ func (c *camera) view() mgl32.Mat4 {
 		// The camera always looks towards the origin.
 		mgl32.Vec3{0, 0, 0},
 		mgl32.Vec3{0, 1, 0})
-}
-
-func (c *camera) handleInput(window *glfw.Window, program uint32) {
-	if window.GetKey(glfw.KeyA) == glfw.Press {
-		c.θ += cameraSpeed
-	} else if window.GetKey(glfw.KeyD) == glfw.Press {
-		c.θ -= cameraSpeed
-	} else if window.GetKey(glfw.KeyW) == glfw.Press {
-		// Since ϕ is measured from the y axis, W (which should move the camera
-		// upwards) decreases ϕ.
-		c.ϕ -= cameraSpeed
-		c.ϕ = math.Max(c.ϕ, minϕ)
-	} else if window.GetKey(glfw.KeyS) == glfw.Press {
-		c.ϕ += cameraSpeed
-		c.ϕ = math.Min(c.ϕ, maxϕ)
-	} else {
-		// Short circuit (and avoid updating the "view" uniform) if the camera
-		// wasn't moved.
-		return
-	}
-	setUniformMatrix4fv(program, viewUniform, c.view())
 }

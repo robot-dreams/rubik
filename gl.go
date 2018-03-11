@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// These values must match the declarations in the vertex shader.
 	perspectiveUniform = "perspective"
 	viewUniform        = "view"
 )

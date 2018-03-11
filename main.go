@@ -63,16 +63,17 @@ func main() {
 
 	c := newCamera(15)
 	setUniformMatrix4fv(program, viewUniform, c.view())
+	window.SetScrollCallback(c.zoomCallback(program))
 
 	r := newRubiksCube()
 	r.buffer(vao, vbo, ebo)
-	window.SetKeyCallback(r.keyCallback(vao, vbo, ebo))
+	window.SetKeyCallback(r.cubeControlCallback(vao, vbo, ebo))
 
 	log.Print("Use number keys (1-9) to control the cube")
 	log.Print("Use 'wasd' to move the camera")
 
 	for !window.ShouldClose() {
-		c.handleInput(window, program)
+		c.handleRotation(window, program)
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
