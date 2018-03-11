@@ -3,13 +3,28 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-func shaderSource(path string) (string, error) {
+func initOpenGL() error {
+	if err := gl.Init(); err != nil {
+		return err
+	}
+
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	log.Println("OpenGL version", version)
+
+	gl.Enable(gl.DEPTH_TEST)
+	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+
+	return nil
+}
+
+func loadShaderSource(path string) (string, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -18,7 +33,7 @@ func shaderSource(path string) (string, error) {
 	return string(data), nil
 }
 
-func checkShaderErr(source string, shader uint32) error {
+func checkShaderError(source string, shader uint32) error {
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
@@ -26,17 +41,16 @@ func checkShaderErr(source string, shader uint32) error {
 		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-		return fmt.Errorf("failed to compile %v: %v", source, log)
+		return fmt.Errorf("Failed to compile %v: %v", source, log)
 	}
 	return nil
 }
 
-func compileShader(path string, shaderType uint32) (uint32, error) {
-	source, err := shaderSource(path)
+func newShader(path string, shaderType uint32) (uint32, error) {
+	source, err := loadShaderSource(path)
 	if err != nil {
 		return 0, err
 	}
-
 	csources, free := gl.Strs(source)
 	defer free()
 
@@ -44,14 +58,14 @@ func compileShader(path string, shaderType uint32) (uint32, error) {
 	gl.ShaderSource(shader, 1, csources, nil)
 	gl.CompileShader(shader)
 
-	err = checkShaderErr(source, shader)
+	err = checkShaderError(source, shader)
 	if err != nil {
 		return 0, err
 	}
 	return shader, nil
 }
 
-func checkProgramErr(program uint32) error {
+func checkProgramError(program uint32) error {
 	var status int32
 	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
 	if status == gl.FALSE {
@@ -59,22 +73,22 @@ func checkProgramErr(program uint32) error {
 		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &logLength)
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
-		return fmt.Errorf("failed to link program: %v", log)
+		return fmt.Errorf("Failed to link program: %v", log)
 	}
 	return nil
 }
 
-func glProgram(
+func newProgram(
 	vertexShaderPath string,
 	fragmentShaderPath string,
 ) (uint32, error) {
-	vertexShader, err := compileShader(vertexShaderPath, gl.VERTEX_SHADER)
+	vertexShader, err := newShader(vertexShaderPath, gl.VERTEX_SHADER)
 	if err != nil {
 		return 0, err
 	}
 	defer gl.DeleteShader(vertexShader)
 
-	fragmentShader, err := compileShader(fragmentShaderPath, gl.FRAGMENT_SHADER)
+	fragmentShader, err := newShader(fragmentShaderPath, gl.FRAGMENT_SHADER)
 	if err != nil {
 		return 0, err
 	}
@@ -85,7 +99,7 @@ func glProgram(
 	gl.AttachShader(program, fragmentShader)
 	gl.LinkProgram(program)
 
-	err = checkProgramErr(program)
+	err = checkProgramError(program)
 	if err != nil {
 		return 0, err
 	}
@@ -95,7 +109,7 @@ func glProgram(
 func setUniformMatrix4fv(program uint32, name string, m mgl32.Mat4) {
 	ul := gl.GetUniformLocation(program, gl.Str(name+"\x00"))
 	if ul == -1 {
-		panic(fmt.Errorf("invalid uniform %v", name))
+		panic(fmt.Errorf("Could not find uniform %v", name))
 	}
 	gl.ProgramUniformMatrix4fv(program, ul, 1, false, &m[0])
 }

@@ -14,7 +14,10 @@ const (
 	height = 600
 )
 
-func initGlfw(title string) (*glfw.Window, error) {
+func initGLFW(title string) (*glfw.Window, error) {
+	// GLFW must always be called from the same OS thread.
+	runtime.LockOSThread()
+
 	if err := glfw.Init(); err != nil {
 		panic(err)
 	}
@@ -35,28 +38,21 @@ func initGlfw(title string) (*glfw.Window, error) {
 }
 
 func main() {
-	runtime.LockOSThread()
-
-	window, err := initGlfw("Rubik's Cube")
+	window, err := initGLFW("Rubik's Cube")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer glfw.Terminate()
 
-	if err := gl.Init(); err != nil {
+	if err := initOpenGL(); err != nil {
 		log.Fatal(err)
 	}
 
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	log.Println("OpenGL version", version)
-
-	gl.Enable(gl.DEPTH_TEST)
-	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-
-	program, err := glProgram("vertex.glsl", "fragment.glsl")
+	program, err := newProgram("vertex.glsl", "fragment.glsl")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	var vao, vbo, ebo uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.GenBuffers(1, &vbo)
