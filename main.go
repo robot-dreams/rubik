@@ -68,6 +68,9 @@ func main() {
 	r.buffer(vao, vbo, ebo)
 	window.SetKeyCallback(r.keyCallback(vao, vbo, ebo))
 
+	log.Print("Use number keys (1-9) to control the cube")
+	log.Print("Use 'wasd' to move the camera")
+
 	for !window.ShouldClose() {
 		c.handleInput(window, program)
 
