@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"runtime"
 
@@ -9,12 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-const (
-	width  = 600
-	height = 600
-)
-
-func initGLFW(title string) (*glfw.Window, error) {
+func initGLFW(title string, width, height int) (*glfw.Window, error) {
 	// GLFW must always be called from the same OS thread.
 	runtime.LockOSThread()
 
@@ -38,7 +34,7 @@ func initGLFW(title string) (*glfw.Window, error) {
 }
 
 func main() {
-	window, err := initGLFW("Rubik's Cube")
+	window, err := initGLFW("Rubik's Cube", 600, 600)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,16 +48,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer gl.DeleteProgram(program)
 
 	var vao, vbo, ebo uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.GenBuffers(1, &vbo)
 	gl.GenBuffers(1, &ebo)
+	defer gl.DeleteVertexArrays(1, &vao)
+	defer gl.DeleteBuffers(1, &vbo)
+	defer gl.DeleteBuffers(1, &ebo)
 
 	perspective := mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100)
 	setUniformMatrix4fv(program, perspectiveUniform, perspective)
 
-	c := newCamera(15)
+	c := newCamera()
 	setUniformMatrix4fv(program, viewUniform, c.view())
 	window.SetScrollCallback(c.zoomCallback(program))
 
@@ -69,8 +69,9 @@ func main() {
 	r.buffer(vao, vbo, ebo)
 	window.SetKeyCallback(r.cubeControlCallback(vao, vbo, ebo))
 
-	log.Print("Use number keys (1-9) to control the cube")
-	log.Print("Use 'wasd' to move the camera")
+	fmt.Println("Cube control: number keys (1-9)")
+	fmt.Println("Camera angle: WASD keys")
+	fmt.Println("Camera zoom: mouse scroll")
 
 	for !window.ShouldClose() {
 		c.handleRotation(window, program)

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -22,7 +21,7 @@ func initOpenGL() error {
 	}
 
 	version := gl.GoStr(gl.GetString(gl.VERSION))
-	log.Println("OpenGL version", version)
+	fmt.Println("OpenGL version", version)
 
 	gl.Enable(gl.DEPTH_TEST)
 	// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)

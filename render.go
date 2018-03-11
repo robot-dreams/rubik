@@ -75,7 +75,7 @@ func (r rubiksCube) render() ([]float32, []uint32) {
 		// The two triangles formed by grouping corners {0, 1, 2} and {1, 2, 3}
 		// produce a square.
 		//
-		// WARNING: These element indexes offsets depend on the order of corners
+		// WARNING: These element index offsets depend on the order of corners
 		// returned by orthogonalSquare3.
 		for _, elementIndexOffset := range []uint32{0, 1, 2, 1, 2, 3} {
 			elementIndexes = append(
@@ -86,8 +86,8 @@ func (r rubiksCube) render() ([]float32, []uint32) {
 	return vertexData, elementIndexes
 }
 
-// Buffers a rendered Rubik's Cube in GPU memory for subsequent drawing, using
-// the given OpenGL buffer objects.
+// Renders a Rubik's Cube and then buffers the result in GPU memory for
+// subsequent drawing.
 func (r rubiksCube) buffer(vao, vbo, ebo uint32) {
 	vertexData, elementIndexes := r.render()
 
@@ -110,7 +110,7 @@ func (r rubiksCube) buffer(vao, vbo, ebo uint32) {
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 4*len(elementIndexes), gl.Ptr(elementIndexes), gl.STATIC_DRAW)
 }
 
-// Drawing a Rubik's Cube involves 6 vertices (2 triangles) for each sticker.
 func (r rubiksCube) elementCount() int32 {
+	// Each sticker has 6 elements (2 triangles with 3 vertices each).
 	return 6 * int32(len(r))
 }

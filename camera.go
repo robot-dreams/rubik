@@ -6,8 +6,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-// We restrict the camera to lie on a sphere around the origin, and we specify
-// the camera position using spherical coordinates.
+// We specify the camera position using spherical coordinates.
 type camera struct {
 	// θ and ϕ are given in radians.
 	r, θ, ϕ float64
@@ -19,19 +18,20 @@ const (
 	minϕ = math.Pi / 12
 	maxϕ = 11 * math.Pi / 12
 
-	// We restrict r to a reasonable range.
+	// We set a range for r so that the cube still looks reasonable at the min
+	// and max allowed values.
 	minR = 10
 	maxR = 50
 
-	// Arbitrary constant that controls how much θ and ϕ change in response to
-	// a given input event.
+	// The "camera speed" is an arbitrary value that controls how much θ and ϕ
+	// change in response to an input event.
 	cameraSpeed = 0.05
 )
 
-func newCamera(r float64) *camera {
+func newCamera() *camera {
 	return &camera{
-		r: r,
-		// Just use sensible defaults for θ and ϕ.
+		// Just use sensible defaults.
+		r: 15,
 		θ: math.Pi / 4,
 		ϕ: math.Pi / 3,
 	}

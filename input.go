@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
-// 'wasd' controls camera rotation.
+// WASD keys control camera rotation.
 func (c *camera) handleRotation(window *glfw.Window, program uint32) {
 	if window.GetKey(glfw.KeyA) == glfw.Press {
 		c.θ += cameraSpeed
@@ -28,7 +28,7 @@ func (c *camera) handleRotation(window *glfw.Window, program uint32) {
 	setUniformMatrix4fv(program, viewUniform, c.view())
 }
 
-// Scroll wheel controls camera zoom.
+// Mouse scroll controls camera zoom.
 func (c *camera) zoomCallback(program uint32) glfw.ScrollCallback {
 	return func(window *glfw.Window, xOffset, yOffset float64) {
 		c.r -= yOffset
