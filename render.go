@@ -26,7 +26,7 @@ func orthogonalVec3(u mgl32.Vec3) mgl32.Vec3 {
 			return v
 		}
 	}
-	panic(fmt.Sprintf("Invalid input vector %v", u))
+	panic(fmt.Sprintf("Invalid vector %v", u))
 }
 
 // Given a nonzero input vector u, returns the four corners of a square that's

@@ -29,6 +29,6 @@ func (c color) rgb() []float32 {
 	case blue:
 		return []float32{0, 0.4, 0.9}
 	default:
-		panic(fmt.Sprintf("Unknown color %v", c))
+		panic(fmt.Sprintf("Invalid color %v", c))
 	}
 }
