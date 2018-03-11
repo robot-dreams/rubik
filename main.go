@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	width  = 500
-	height = 500
+	width  = 600
+	height = 600
 )
 
 func initGlfw(title string) (*glfw.Window, error) {
@@ -100,7 +100,7 @@ func main() {
 
 	window.SetKeyCallback(keyCallback)
 	for !window.ShouldClose() {
-		gl.ClearColor(0.1, 0.2, 0.2, 1.0)
+		// gl.ClearColor(0.1, 0.2, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		data, indices := r.render()

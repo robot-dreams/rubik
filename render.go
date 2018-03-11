@@ -29,11 +29,11 @@ func orthogonalVec3(u mgl32.Vec3) mgl32.Vec3 {
 	panic(fmt.Sprintf("Invalid input vector %v", u))
 }
 
-// Given a nonzero input vector u, returns the four corners of a unit square
-// orthogonal to u and centered at the origin.
-func orthogonalUnitSquare3(u mgl32.Vec3) []mgl32.Vec3 {
-	v := orthogonalVec3(u).Normalize().Mul(0.5)
-	w := u.Cross(v).Normalize().Mul(0.5)
+// Given a nonzero input vector u, returns the four corners of a square that's
+// orthogonal to u, centered at the origin, and has the given side length.
+func orthogonalSquare3(u mgl32.Vec3, l float32) []mgl32.Vec3 {
+	v := orthogonalVec3(u).Normalize().Mul(l / 2)
+	w := u.Cross(v).Normalize().Mul(l / 2)
 	return []mgl32.Vec3{
 		v.Add(w),
 		v.Sub(w),
@@ -53,7 +53,9 @@ func orthogonalUnitSquare3(u mgl32.Vec3) []mgl32.Vec3 {
 // values), and the stride is 24 (6 float32 values).
 func (s sticker) render(vertexData *[]float32) {
 	translation := s.v.render().Add(s.n.render().Mul(0.5))
-	for _, corner := range orthogonalUnitSquare3(s.n.render()) {
+	// Specifying a side length less than 1 in the call to orthogonalSquare3
+	// gives an "exploded cube" look.
+	for _, corner := range orthogonalSquare3(s.n.render(), 0.5) {
 		vertexPosition := corner.Add(translation)
 		*vertexData = append(*vertexData, vertexPosition[:]...)
 		*vertexData = append(*vertexData, s.c.rgb()...)
@@ -72,7 +74,7 @@ func (r rubiksCube) render() ([]float32, []uint32) {
 		// produce a square.
 		//
 		// WARNING: These element indexes offsets depend on the order of corners
-		// returned by orthogonalUnitSquare3.
+		// returned by orthogonalSquare3.
 		for _, elementIndexOffset := range []uint32{0, 1, 2, 1, 2, 3} {
 			elementIndexes = append(
 				elementIndexes,
