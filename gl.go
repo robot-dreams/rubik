@@ -109,12 +109,12 @@ func glObjects() (vao, vbo, ebo uint32) {
 	return vao, vbo, ebo
 }
 
-func glDraw(program, vao, vbo, ebo uint32, vertices []float32, indices []uint32) {
+func glDraw(program, vao, vbo, ebo uint32, data []float32, indices []uint32) {
 	gl.UseProgram(program)
 	gl.BindVertexArray(vao)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(vertices), gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(data), gl.Ptr(data), gl.STATIC_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 4*len(indices), gl.Ptr(indices), gl.STATIC_DRAW)
@@ -125,7 +125,7 @@ func glDraw(program, vao, vbo, ebo uint32, vertices []float32, indices []uint32)
 	gl.VertexAttribPointer(1, 3, gl.FLOAT, false, 24, unsafe.Pointer(uintptr(12)))
 	gl.EnableVertexAttribArray(1)
 
-	gl.DrawElements(gl.TRIANGLES, 36, gl.UNSIGNED_INT, nil)
+	gl.DrawElements(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_INT, nil)
 }
 
 func glRadians(degrees float64) float32 {
