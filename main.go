@@ -47,6 +47,7 @@ func main() {
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
+
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
 
@@ -57,55 +58,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	vao, vbo, ebo := glObjects()
+	var vao, vbo, ebo uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.GenBuffers(1, &vbo)
+	gl.GenBuffers(1, &ebo)
 
 	s := matstack.NewMatStack()
 	s.LeftMul(mgl32.Translate3D(-0.5, -0.5, -0.5))
 	s.LeftMul(mgl32.LookAt(10, 6, 10, 0, 0, 0, 0, 1, 0))
-	s.LeftMul(mgl32.Perspective(glRadians(30), 1, 0.1, 100))
+	s.LeftMul(mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100))
 	mustSetUniformMatrix4fv(program, "transform", s.Peek())
 
 	r := newRubiksCube()
-	keyCallback := func(
-		window *glfw.Window,
-		key glfw.Key,
-		_ int,
-		action glfw.Action,
-		mods glfw.ModifierKey,
-	) {
-		if action != glfw.Press {
-			return
-		}
-		switch key {
-		case glfw.KeyQ:
-			r.rotateX(-1)
-		case glfw.KeyW:
-			r.rotateX(0)
-		case glfw.KeyE:
-			r.rotateX(1)
-		case glfw.KeyA:
-			r.rotateY(-1)
-		case glfw.KeyS:
-			r.rotateY(0)
-		case glfw.KeyD:
-			r.rotateY(1)
-		case glfw.KeyZ:
-			r.rotateZ(-1)
-		case glfw.KeyX:
-			r.rotateZ(0)
-		case glfw.KeyC:
-			r.rotateZ(1)
-		}
-	}
+	r.buffer(vao, vbo, ebo)
+	window.SetKeyCallback(r.keyCallback(vao, vbo, ebo))
 
-	window.SetKeyCallback(keyCallback)
 	for !window.ShouldClose() {
-		// gl.ClearColor(0.1, 0.2, 0.2, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-		data, indices := r.render()
-		glDraw(program, vao, vbo, ebo, data, indices)
-
+		gl.UseProgram(program)
+		gl.BindVertexArray(vao)
+		gl.DrawElements(gl.TRIANGLES, r.elementCount(), gl.UNSIGNED_INT, nil)
 		glfw.PollEvents()
 		window.SwapBuffers()
 	}

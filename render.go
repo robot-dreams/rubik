@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"unsafe"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -82,4 +84,33 @@ func (r rubiksCube) render() ([]float32, []uint32) {
 		}
 	}
 	return vertexData, elementIndexes
+}
+
+// Buffers a rendered Rubik's Cube in GPU memory for subsequent drawing, using
+// the given OpenGL buffer objects.
+func (r rubiksCube) buffer(vao, vbo, ebo uint32) {
+	vertexData, elementIndexes := r.render()
+
+	gl.BindVertexArray(vao)
+
+	// Copy vertex data to GPU memory.
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(vertexData), gl.Ptr(vertexData), gl.STATIC_DRAW)
+
+	// Set position data as location 0.
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 24, nil)
+	gl.EnableVertexAttribArray(0)
+
+	// Set color data as location 1.
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, false, 24, unsafe.Pointer(uintptr(12)))
+	gl.EnableVertexAttribArray(1)
+
+	// Copy element indexes to GPU memory.
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 4*len(elementIndexes), gl.Ptr(elementIndexes), gl.STATIC_DRAW)
+}
+
+// Drawing a Rubik's Cube involves 6 vertices (2 triangles) for each sticker.
+func (r rubiksCube) elementCount() int32 {
+	return 6 * int32(len(r))
 }
