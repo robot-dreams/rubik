@@ -58,18 +58,24 @@ func main() {
 	gl.GenBuffers(1, &vbo)
 	gl.GenBuffers(1, &ebo)
 
-	setUniformMatrix4fv(program, "view", mgl32.LookAt(10, 6, 10, 0, 0, 0, 0, 1, 0))
-	setUniformMatrix4fv(program, "perspective", mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100))
+	perspective := mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100)
+	setUniformMatrix4fv(program, perspectiveUniform, perspective)
+
+	c := newCamera(15)
+	setUniformMatrix4fv(program, viewUniform, c.view())
 
 	r := newRubiksCube()
 	r.buffer(vao, vbo, ebo)
 	window.SetKeyCallback(r.keyCallback(vao, vbo, ebo))
 
 	for !window.ShouldClose() {
+		c.handleInput(window, program)
+
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.UseProgram(program)
 		gl.BindVertexArray(vao)
 		gl.DrawElements(gl.TRIANGLES, r.elementCount(), gl.UNSIGNED_INT, nil)
+
 		glfw.PollEvents()
 		window.SwapBuffers()
 	}

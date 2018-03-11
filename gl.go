@@ -10,6 +10,11 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+const (
+	perspectiveUniform = "perspective"
+	viewUniform        = "view"
+)
+
 func initOpenGL() error {
 	if err := gl.Init(); err != nil {
 		return err
