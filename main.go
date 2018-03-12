@@ -58,7 +58,7 @@ func main() {
 	defer gl.DeleteBuffers(1, &vbo)
 	defer gl.DeleteBuffers(1, &ebo)
 
-	perspective := mgl32.Perspective(mgl32.DegToRad(30), 1, 0.1, 100)
+	perspective := mgl32.Perspective(mgl32.DegToRad(60), 1, 0.1, 100)
 	setUniformMatrix4fv(program, perspectiveUniform, perspective)
 
 	c := newCamera()

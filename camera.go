@@ -20,7 +20,7 @@ const (
 
 	// We set a range for r so that the cube still looks reasonable at the min
 	// and max allowed values.
-	minR = 10
+	minR = 5
 	maxR = 50
 
 	// The "camera speed" is an arbitrary value that controls how much θ and ϕ
@@ -31,7 +31,7 @@ const (
 func newCamera() *camera {
 	return &camera{
 		// Just use sensible defaults.
-		r: 15,
+		r: 10,
 		θ: math.Pi / 4,
 		ϕ: math.Pi / 3,
 	}
