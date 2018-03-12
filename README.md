@@ -15,14 +15,14 @@ Note that this is purely a graphics program; there's no features like automatic 
 ```
 github.com/go-gl/gl/v4.1-core/gl
 github.com/go-gl/glfw/v3.2/glfw
-github.com/go-gl/mathgl
+github.com/go-gl/mathgl/mgl32
 ```
 
 ## Implementation Notes
 
 - The code for handling the Rubik's Cube itself is in `sticker.go` and `rubik.go`
 - Most of the "interesting" graphics code is in `render.go` and `camera.go`
-- Keyboard and mouse input is, unsurprisingly, handled in `input.go`
+- User input is, unsurprisingly, handled in `input.go`
 
 ## Potential Extensions
 
