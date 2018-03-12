@@ -6,7 +6,3 @@
 
 # Unignore all dirs
 !*/
-
-# Ignore all texture files
-*.png
-*.jpg
