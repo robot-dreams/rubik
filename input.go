@@ -1,25 +1,25 @@
 package main
 
 import (
-	"math"
-
 	"github.com/go-gl/glfw/v3.2/glfw"
+)
+
+const (
+	// The "camera speed" is an arbitrary value that controls how much the
+	// camera moves in response to an input event.
+	cameraSpeed = 0.05
 )
 
 // WASD keys control camera rotation.
 func (c *camera) handleRotation(window *glfw.Window, program uint32) {
-	if window.GetKey(glfw.KeyA) == glfw.Press {
-		c.θ += cameraSpeed
-	} else if window.GetKey(glfw.KeyD) == glfw.Press {
-		c.θ -= cameraSpeed
-	} else if window.GetKey(glfw.KeyW) == glfw.Press {
-		// Since ϕ is measured from the y axis, W (which should move the camera
-		// upwards) decreases ϕ.
-		c.ϕ -= cameraSpeed
-		c.ϕ = math.Max(c.ϕ, minϕ)
+	if window.GetKey(glfw.KeyW) == glfw.Press {
+		c.adjustPitch(cameraSpeed)
+	} else if window.GetKey(glfw.KeyA) == glfw.Press {
+		c.adjustYaw(cameraSpeed)
 	} else if window.GetKey(glfw.KeyS) == glfw.Press {
-		c.ϕ += cameraSpeed
-		c.ϕ = math.Min(c.ϕ, maxϕ)
+		c.adjustPitch(-cameraSpeed)
+	} else if window.GetKey(glfw.KeyD) == glfw.Press {
+		c.adjustYaw(-cameraSpeed)
 	} else {
 		// Short circuit (and avoid updating the "view" uniform) if the camera
 		// wasn't moved.
@@ -31,9 +31,7 @@ func (c *camera) handleRotation(window *glfw.Window, program uint32) {
 // Mouse scroll controls camera zoom.
 func (c *camera) zoomCallback(program uint32) glfw.ScrollCallback {
 	return func(window *glfw.Window, xOffset, yOffset float64) {
-		c.r -= yOffset
-		c.r = math.Max(c.r, minR)
-		c.r = math.Min(c.r, maxR)
+		c.adjustDistanceToOrigin(-yOffset)
 		setUniformMatrix4fv(program, viewUniform, c.view())
 	}
 }

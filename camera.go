@@ -6,51 +6,51 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-// We specify the camera position using spherical coordinates.
-type camera struct {
-	// θ and ϕ are given in radians.
-	r, θ, ϕ float64
-}
-
 const (
-	// We require that ϕ stays between π/12 and 11π/12 so that we can always use
-	// (0, 1, 0) as the "up" vector while avoiding degenerate cases.
-	minϕ = math.Pi / 12
-	maxϕ = 11 * math.Pi / 12
-
-	// We set a range for r so that the cube still looks reasonable at the min
-	// and max allowed values.
-	minR = 5
-	maxR = 50
-
-	// The "camera speed" is an arbitrary value that controls how much θ and ϕ
-	// change in response to an input event.
-	cameraSpeed = 0.05
+	// We set a range for the distance from the camera to the origin so that the
+	// cube still looks reasonable at the min and max allowed values.
+	minDistanceToOrigin = 5
+	maxDistanceToOrigin = 50
 )
+
+type camera struct {
+	eye, up mgl32.Vec3
+}
 
 func newCamera() *camera {
 	return &camera{
 		// Just use sensible defaults.
-		r: 10,
-		θ: math.Pi / 4,
-		ϕ: math.Pi / 3,
+		eye: mgl32.Vec3{0, 0, 10},
+		up:  mgl32.Vec3{0, 1, 0},
 	}
 }
 
-func (c *camera) eye() mgl32.Vec3 {
-	return mgl32.Vec3{
-		float32(c.r * math.Cos(c.θ) * math.Sin(c.ϕ)),
-		// Unlike the usual spherical coordinate case, up / down is given by the
-		// y coordinate (instead of the z coordinate).
-		float32(c.r * math.Cos(c.ϕ)),
-		float32(c.r * math.Sin(c.θ) * math.Sin(c.ϕ)),
-	}
+func axisAngleRotation(v mgl32.Vec3, angle float32, axis mgl32.Vec3) mgl32.Vec3 {
+	return mgl32.HomogRotate3D(angle, axis).Mul4x1(v.Vec4(1)).Vec3()
+}
+
+func (c *camera) adjustPitch(delta float32) {
+	axis := c.eye.Cross(c.up).Normalize()
+	c.eye = axisAngleRotation(c.eye, delta, axis)
+	c.up = axisAngleRotation(c.up, delta, axis).Normalize()
+}
+
+func (c *camera) adjustYaw(delta float32) {
+	c.eye = axisAngleRotation(c.eye, delta, c.up)
+}
+
+func (c *camera) adjustDistanceToOrigin(delta float64) {
+	d := float64(c.eye.Len()) + delta
+
+	// Restrict the new distance to the allowed range.
+	d = math.Max(d, minDistanceToOrigin)
+	d = math.Min(d, maxDistanceToOrigin)
+
+	// Scale the camera position so it has the updated distance.
+	c.eye = c.eye.Mul(float32(d) / c.eye.Len())
 }
 
 func (c *camera) view() mgl32.Mat4 {
-	return mgl32.LookAtV(
-		c.eye(),
-		// The camera always looks towards the origin.
-		mgl32.Vec3{0, 0, 0},
-		mgl32.Vec3{0, 1, 0})
+	// The camera always looks towards the origin.
+	return mgl32.LookAtV(c.eye, mgl32.Vec3{0, 0, 0}, c.up)
 }
