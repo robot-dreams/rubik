@@ -26,8 +26,9 @@ github.com/go-gl/mathgl/mgl32
 
 ## Potential Extensions
 
-- Animated cube operations
-- Configurable cube size (e.g. 2x2, 5x5)
-- Cube controls using the mouse
-- Improved appearance (e.g. lighting, opacity, distance-based fog)
-- Unrestricted camera rotation
+- [x] Unrestricted camera rotation
+- [x] Basic lighting
+- [ ] Animated cube operations
+- [ ] Configurable cube size (e.g. 2x2, 5x5)
+- [ ] Cube controls using the mouse
+- [ ] Improved appearance (e.g. fog, neon, opacity)
