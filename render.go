@@ -50,7 +50,7 @@ func (s sticker) render(vertexData *[]float32) {
 	translation := s.v.render().Add(s.n.render().Mul(0.5))
 	// Specifying a side length less than 1 in the call to orthogonalSquare3
 	// gives an "exploded cube" look.
-	for _, corner := range orthogonalSquare3(s.n.render(), 0.5) {
+	for _, corner := range orthogonalSquare3(s.n.render(), 0.75) {
 		vertexPosition := corner.Add(translation)
 		*vertexData = append(*vertexData, vertexPosition[:]...)
 		*vertexData = append(*vertexData, s.c.rgb()...)
