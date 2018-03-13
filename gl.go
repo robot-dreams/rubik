@@ -11,8 +11,9 @@ import (
 
 const (
 	// These values must match the declarations in the vertex shader.
-	perspectiveUniform = "perspective"
-	viewUniform        = "view"
+	perspectiveUniform  = "perspective"
+	viewUniform         = "view"
+	viewPositionUniform = "viewPosition"
 )
 
 func initOpenGL() error {
@@ -117,4 +118,12 @@ func setUniformMatrix4fv(program uint32, name string, m mgl32.Mat4) {
 		panic(fmt.Errorf("Could not find uniform %v", name))
 	}
 	gl.ProgramUniformMatrix4fv(program, ul, 1, false, &m[0])
+}
+
+func setUniform3f(program uint32, name string, x, y, z float32) {
+	ul := gl.GetUniformLocation(program, gl.Str(name+"\x00"))
+	if ul == -1 {
+		panic(fmt.Errorf("Could not find uniform %v", name))
+	}
+	gl.ProgramUniform3f(program, ul, x, y, z)
 }

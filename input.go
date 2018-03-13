@@ -26,6 +26,7 @@ func (c *camera) handleRotation(window *glfw.Window, program uint32) {
 		return
 	}
 	setUniformMatrix4fv(program, viewUniform, c.view())
+	setUniform3f(program, viewPositionUniform, c.eye[0], c.eye[1], c.eye[2])
 }
 
 // Mouse scroll controls camera zoom.
@@ -33,6 +34,7 @@ func (c *camera) zoomCallback(program uint32) glfw.ScrollCallback {
 	return func(window *glfw.Window, xOffset, yOffset float64) {
 		c.adjustDistanceToOrigin(-yOffset)
 		setUniformMatrix4fv(program, viewUniform, c.view())
+		setUniform3f(program, viewPositionUniform, c.eye[0], c.eye[1], c.eye[2])
 	}
 }
 

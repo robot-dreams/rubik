@@ -63,6 +63,7 @@ func main() {
 
 	c := newCamera()
 	setUniformMatrix4fv(program, viewUniform, c.view())
+	setUniform3f(program, viewPositionUniform, c.eye[0], c.eye[1], c.eye[2])
 	window.SetScrollCallback(c.zoomCallback(program))
 
 	r := newRubiksCube()
