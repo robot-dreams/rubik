@@ -12,6 +12,7 @@ void main() {
     float ambientStrength = 0.15;
     float diffuseStrength = 0.7;
     float specularStrength = 0.9;
+    float specularPower = 16;
 
     vec3 lightPosition = viewPosition;
     vec3 lightColor = vec3(1.0);
@@ -24,7 +25,9 @@ void main() {
 
     vec3 viewDirection = normalize(viewPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-lightDirection, stickerNormal);
-    float specularAmount = pow(max(dot(viewDirection, reflectDirection), 0.0), 16);
+    float specularAmount = pow(
+            max(dot(viewDirection, reflectDirection), 0.0),
+            specularPower);
     vec3 specular = specularStrength * specularAmount * lightColor;
 
     vec3 result = (ambient + diffuse + specular) * stickerColor;
