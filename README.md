@@ -10,12 +10,21 @@ This repository contains a Rubik's Cube implementation using go and OpenGL.  Bot
 - Camera angle: WASD keys
 - Camera zoom: mouse scroll
 
-## Dependencies
+## Instructions
+
+If you don't have go installed yet, you can [download the latest version of go from the official website](https://golang.org/dl/).  On Mac OS X, you will also need a recent version of Xcode and the command line tools.
 
 ```
-github.com/go-gl/gl/v4.1-core/gl
-github.com/go-gl/glfw/v3.2/glfw
-github.com/go-gl/mathgl/mgl32
+# Fetch dependencies.
+go get github.com/go-gl/gl/v4.1-core/gl
+go get github.com/go-gl/glfw/v3.2/glfw
+go get github.com/go-gl/mathgl/mgl32
+
+# Clone repo and build everything.
+git clone https://github.com/robot-dreams/rubik.git; cd rubik; go build
+
+# Start the program!
+./rubik
 ```
 
 ## Implementation Notes
